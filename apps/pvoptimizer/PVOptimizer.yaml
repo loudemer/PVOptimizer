@@ -1,0 +1,68 @@
+PVOptimizer:
+  class: PVOptimizer
+  module: PVOptimizer
+  log: pvoptimizer_log
+  constrain_input_boolean: input_boolean.enable_solar_optimizer
+
+  # sensor to get total available solar energy must converted to positive value
+  # must include current routeur energy
+  available_energy: sensor.available_energy
+  # Name of subscription must be : Tempo, HeuresCreuses, Base
+  subscription: Tempo
+  # sensor to get color of current day for tempo subscriptions
+  # value must be : Rouge, Blanc, Bleu 
+  # you an get it with RTE API
+  # leave an empty string "" if not 
+  journee_tempo: sensor.rte_tempo_couleur_actuelle
+
+  # For HeuresCreuses subscription fill only prix_bleu_hc and prix_bleu_hp
+  prix_bleu_hc: 12.96
+  prix_bleu_hp: 16.09
+  prix_blanc_hc: 14.86
+  prix_blanc_hp: 18.94
+  prix_rouge_hc: 15.68
+  prix_rouge_hp: 75.64
+  # If you don't resell export grid energy leave 0.0
+  prix_rachat: 11.00
+
+  # Device list fill all items for each device
+  # Restricted to 8 devices at present time
+  # night_time_on must be set to None if device is controlled in a separate application
+  my_devices:
+    lave_vaisselle:
+      name: lave_vaisselle
+      power: 2000
+      duration: 180
+      switch_entity: switch.lave_vaisselle
+      night_time_on: "00:30:00"
+    seche_linge:
+      name: seche_linge
+      power: 2500
+      duration: 90
+      switch_entity: switch.seche_linge
+      night_time_on: "03:00:00"
+    lave_linge:
+      name: lave_linge
+      power: 2200
+      duration: 60
+      switch_entity: switch.lave_linge
+      night_time_on: "04:00:00"
+    ev_charging:
+      name: pac
+      power: 1500
+      duration: 120
+      switch_entity: switch.relai_pac
+      night_time_on: None
+    pool_filtration:
+      name: pool_filtration
+      power: 1500
+      duration: 60
+      switch_entity: switch.piscine_pompe_filtration   
+      night_time_on: None
+    pac:
+      name: ev_charging
+      power: 2200
+      duration: 120
+      switch_entity: switch.ev_charging     
+      night_time_on: None
+  

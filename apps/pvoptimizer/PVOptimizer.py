@@ -1,0 +1,314 @@
+##############################################################################################
+# PVOptimizer
+# Author: Gerard Mamelle (2024)
+# Version : 1.0
+# Program under MIT licence
+##############################################################################################
+import hassapi as hass
+import math
+import datetime
+from datetime import timedelta
+from datetime import time
+from dataclasses import dataclass
+from typing import Dict
+
+MAX_DEVICE = 8              # Maximum number of available devices
+LOOP_INTERVAL = 60          # Interval in seconds to check devices
+
+@dataclass
+class MyDevice:
+    name: str
+    power: int
+    duration: int
+    switch_entity: str
+    night_time_on: str
+
+    @classmethod
+    def from_args(cls, mydevs: Dict[str, Dict[str, str]]) -> Dict[str, "MyDevice"]:
+        ret = {}
+        for k, v in mydevs.items():
+            ret[k] = cls(**v)
+        return ret
+# Store device parameters
+
+@dataclass
+class device:
+    
+    def __init__(self, name: str, index: str, power: int, min_duration: int, switch_entity: str, night_time_on: str):
+        # control entities
+        self.name = name                                                # device name
+        self.enable_entity = "input_boolean.device_request_" + index   # request entity
+        self.switch_entity = switch_entity                                     # switch entity
+        self.start_entity = "input_boolean.start_device_" + index       # start entity
+        self.duration_entity = "input_text.device_duration_" + index    # task duration entity display
+        # device parameters
+        self.power= power                                               # device power
+        self.min_duration = min_duration  # cycle duration              # Min duration task
+        self.request= "off"                                             # request status
+        self.task_duration = 0                                          # duration of current task    
+        self.start_time=datetime.datetime.now()                         # start time of task
+        self.priority = False                                           # priority flag
+        self.started = 'off'                                            # start status
+        self.night_time_on = night_time_on                              # time to start night task
+
+# Programme principal
+class PVOptimizer(hass.Hass):
+
+    def initialize(self):
+        self.log("Start SolarOptimizer")
+
+        # Create device list from yaml file
+        self.device_list = []
+        try:
+            self.mydevs = MyDevice.from_args(self.args["my_devices"])
+        except KeyError:
+            self.log("missing required argument: my_devices")
+            raise
+
+        self.create_device_list()
+        # check if entities exist, if not create missing entities
+        self.check_switch_entities()
+        
+        # Init 
+        self.power_ratio = 1.0
+        # compute current power ratio 
+        self.compute_power_ratio()
+        # init grid status 
+        self.available_energy = 0
+        self.update_current_grid_status()
+        # schedule day initialization
+        self.run_at_sunrise(self.init_day)              
+        # schedule day loop
+        self.run_every(self.day_loop, "now", 60)  
+        # schedule night tasks in case of they were not run during day
+        self.run_daily(self.run_remaining_tasks,"22:00:00")
+
+        self.log("SolarOptimizer initialized")
+
+    @property
+    def color_tempo(self) -> str:
+        list_colors = ["Bleu" , "Blanc", "Rouge"]
+        try:
+            response = str(self.get_state(self.args["journee_tempo"]))
+            if response in list_colors:
+                return response
+            else:
+                self.log("Bad argument for journee_tempo, Rouge applied") 
+                return "Rouge"    
+
+        except Exception as e:
+            self.log("missing required argument: couleur journee tempo", e)
+            return "Rouge"
+    
+    @property
+    def subscription(self) -> str:
+        list_subscriptions = ["Tempo", "HeuresCreuses", "Base"]
+        try:
+            response = str(self.args["subscription"])  
+            if response in list_subscriptions:
+                return response
+            else:
+                self.log("Bad argument for subscription, Base subscription applied") 
+                return "Base"    
+        except Exception as e:
+            self.log("missing required argument: subscription", e)
+            return "Base"
+
+    # Main loop to check devices every LOOP_INTERVAL seconds
+    # Only active during day light and "jours bleus et blancs"
+    def day_loop(self, kwargs):                                 
+        if self.now_is_between("sunrise", "sunset"):
+            if self.subscription == "Tempo":
+                if self.color_tempo == "Rouge":
+                    return 
+            # update device process status
+            self.update_process() 
+            # update available pv power                        
+            self.available_energy = self.update_current_grid_status()             
+            # try to init new device request
+            self.try_init_new_process()               
+            # try to stop active device process
+            self.try_stop_active_process()            
+
+    # Reinit all request and start commands at sunrise
+    def init_day(self, kwargs):                             
+        self.log("Init day")
+        for cur_device in self.device_list:
+            cur_device.request = self.get_state(cur_device.enable_entity)
+            cur_device.started = 'off'
+            self.stop_device(cur_device)
+        self.compute_power_ratio()
+         
+    # fill device list with each device described in SolarOptimizer.yaml file
+    def create_device_list(self) :
+        i = 1
+        for val in self.mydevs.values():
+            self.device_list.append(device(val.name,str(i),val.power,val.duration,val.switch_entity,val.night_time_on))
+            i = i + 1
+            if i > MAX_DEVICE:
+                self.log(f'Warning device number exceed {MAX_DEVICE}')
+                break
+        
+    # For each device check if device list entities are present and create them if necessary
+    def check_switch_entities(self):
+        if not self.device_list:
+            self.log('Warning missing my_devices item in yaml file')
+            return
+        for cur_device in self.device_list:
+            if self.get_state(cur_device.switch_entity) == None:
+                self.log(f'Warning switch : {cur_device.switch_entity} doesn t exist')
+
+    # update device process : switch push command, end of task
+    def update_process(self):                        
+        for cur_device in self.device_list:
+            cur_device.request = self.get_state(cur_device.enable_entity)  # update device enable
+            #self.log (f'state {cur_device.enable_entity} = {cur_device.request}')
+            device_switch_status = self.get_state(cur_device.switch_entity)
+            # Take in account direct start or stop device command with switch push
+            # update device status if necessary 
+            if device_switch_status == 'on':
+                if cur_device.request == 'off' or cur_device.started == 'off':
+                    # device directly started with switch push
+                    self.set_state(cur_device.enable_entity, state="on")
+                    self.set_state(cur_device.start_entity, state="on")
+                    cur_device.request = 'on'
+                    cur_device.started = 'on'              
+                    cur_device.start_time = self.get_now()
+                    cur_device.task_duration = 0
+            else:
+                if cur_device.started == 'on':
+                    # Device directly stopped with switch push
+                    self.set_state(cur_device.enable_entity, state="off")
+                    self.set_state(cur_device.start_entity, state="off")
+                    cur_device.request = 'off'
+                    cur_device.started = 'off'              
+                    cur_device.task_duration = 0
+            # Check if current started devices need to be stopped
+            if cur_device.started == 'on':                                              
+                self.update_task_duration(cur_device)
+                self.check_end_process(cur_device)
+
+    # Try to init new device
+    def try_init_new_process(self):                                              
+        for cur_device in self.device_list:
+            if cur_device.request == 'on' and cur_device.started == 'off':
+                if self.try_to_run(cur_device):
+                    self.log(f'Start {cur_device.name}')
+         
+    # Try to stop active device
+    def try_stop_active_process(self):                                              
+        for cur_device in self.device_list:
+            if cur_device.request == 'on' and cur_device.started == 'on':
+                if cur_device.task_duration > cur_device.min_duration :
+                    self.stop_device(cur_device)
+
+    # Stop a device
+    def stop_device(self, cur_device):
+        self.log(f'Stop {cur_device.name}')
+        self.set_state(cur_device.enable_entity, state="off")
+        self.update_task_duration(cur_device)
+        cur_device.started = 'off'  
+        if cur_device.night_time_on != 'None':
+            self.turn_off(cur_device.switch_entity)
+            self.log(f'switch {cur_device.name} off')
+        else:
+            self.set_state(cur_device.start_entity, state="off")
+            self.log(f'flag {cur_device.name} off')
+ 
+    # Start a device
+    def start_device(self, cur_device):
+        self.log(f'Start {cur_device.name}')
+        cur_device.started = 'on'
+        cur_device.start_time = self.get_now()
+        cur_device.task_duration = 0
+        if cur_device.night_time_on != 'None':
+            self.turn_on(cur_device.switch_entity)
+            self.log(f'switch {cur_device.name} actif')
+        else:
+            self.set_state(cur_device.start_entity, state="on")
+            self.log(f'Flag {cur_device.name} actif')
+
+    # start device for night run
+    def start_delayed_device(self,kwargs):
+        entity_id = kwargs.get('entity_id')
+        self.log(f'Start delayed service {entity_id}')
+        self.turn_on(entity_id)
+    
+    # Stop device if min duration is reached
+        
+    def check_end_process(self, cur_device):
+        if cur_device.task_duration > cur_device.min_duration:   
+            self.stop_device(cur_device)
+            self.log(f'Stop {cur_device.name} , duration = {cur_device.task_duration}')
+    
+    # Update grid balance
+    def update_current_grid_status(self) -> int:
+        available_energy = self.get_safe_float("available_energy")
+        if available_energy == None:
+            return 0
+        else:
+            return int(available_energy)
+        
+    # Try to start a device if available grid energy is 
+    def try_to_run(self, cur_device) -> bool:
+        power_mini = float(cur_device.power) * self.power_ratio
+        self.log(f'power mini  = {power_mini}, available power = {self.available_energy}')
+        if power_mini < float(self.available_energy):
+            self.log(f'init start {cur_device.name}')
+            self.start_device(cur_device)
+            return True
+        else:
+            self.log(f'device power {cur_device.name} is too high, waiting !')
+            return False
+
+    # execution la nuit en HC des taches qui n'ont pu etre realisees le jour
+    def run_remaining_tasks(self,kwargs):
+        self.log("Night Tasks")
+        for cur_device in self.device_list:
+            cur_device.request = self.get_state(cur_device.enable_entity)            
+            if cur_device.request == 'on' and cur_device.night_time_on != 'None':
+                self.run_at(self.start_delayed_device,cur_device.night_time_on, entity_id=cur_device.switch_entity )
+                self.log(f' {cur_device.name} scheduled')
+    
+    # Check if min duration is reached
+    def check_min_duration_ok(self, cur_device) -> bool:            
+        return (bool(cur_device.task_duration > cur_device.min_duration)) 
+   
+    def get_delay_minutes(self,recent: datetime, old: datetime) -> int:
+        diff = recent - old
+        minutes = diff.total_seconds() / 60
+        return int(minutes)
+
+    def update_task_duration(self, cur_device):
+        if cur_device.started == 'on':
+            cur_device.task_duration = self.get_delay_minutes(self.get_now(), cur_device.start_time)
+        else:
+            cur_device.task_duration == 0
+        self.set_state(cur_device.duration_entity, state=str(cur_device.task_duration))
+
+    # Get a safe float state value for an entity.
+    # Return None if entity is not available
+    def get_safe_float(self, entity_id: str) -> float:
+        state = self.get_state(self.args[entity_id])
+        if not state or state == "unknown" or state == "unavailable":
+            return None
+        float_val = float(state)
+        return None if math.isinf(float_val) or not math.isfinite(float_val) else float_val
+
+    # compute power ratio to initiate a new task
+    def compute_power_ratio(self):
+        subscription = self.args['subscription']
+        if  subscription == "Tempo":
+            color_tempo = self.color_tempo
+            if color_tempo == "Bleu":
+                self.power_ratio = 1.0 - (self.args['prix_bleu_hc']-self.args['prix_rachat']) / self.args['prix_bleu_hp']
+            else:
+                if color_tempo == "Blanc":
+                    self.power_ratio = 1.0 - (self.args['prix_blanc_hc']-self.args['prix_rachat']) / self.args['prix_blanc_hp']
+                else:
+                    self.power_ratio = 1.0 - (self.args['prix_rouge_hc']-self.args['prix_rachat']) / self.args['prix_rouge_hp']
+        elif subscription == "HeuresCreuses":
+            self.power_ratio = 1.0 - (self.args['prix_bleu_hc']-self.args['prix_rachat']) / self.args['prix_bleu_hp']   
+        else: # Base subscription 
+            self.power_ratio = 1.0 
+

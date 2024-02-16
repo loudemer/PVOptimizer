@@ -1,0 +1,395 @@
+square: false
+type: grid
+title: Programmation des appareils
+cards:
+  - type: custom:mushroom-template-card
+    primary: Lave Vaiss
+    secondary: ''
+    entity: input_boolean.device_request_1
+    icon: |-
+      {% if is_state('input_boolean.device_request_1', 'on') %}
+        mdi:toggle-switch
+      {% else %}
+        mdi:toggle-switch-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('input_boolean.device_request_1', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: switch.lave_vaisselle
+    primary: |-
+      {% if is_state('switch.lave_vaisselle', 'on') %}
+        Marche
+      {% else %}
+        Arrêt
+      {% endif %}
+    secondary: ''
+    icon: |-
+      {% if is_state('switch.lave_vaisselle', 'on') %}
+        mdi:dishwasher
+      {% else %}
+        mdi:dishwasher-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('switch.lave_vaisselle', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-entity-card
+    entity: sensor.lave_vaisselle_power
+    layout: vertical
+    primary_info: state
+    icon_color: amber
+    tap_action:
+      action: more-info
+    secondary_info: none
+  - type: custom:mushroom-entity-card
+    entity: input_text.device_duration_1
+    icon: mdi:camera-timer
+    layout: vertical
+    tap_action:
+      action: more-info
+    icon_color: amber
+    secondary_info: none
+    primary_info: state
+    name: Mn
+  - type: custom:mushroom-template-card
+    primary: Lave Linge
+    secondary: ''
+    entity: input_boolean.device_request_2
+    icon: |-
+      {% if is_state('input_boolean.device_request_2', 'on') %}
+        mdi:toggle-switch
+      {% else %}
+        mdi:toggle-switch-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('input_boolean.device_request_2', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: switch.lave_linge
+    primary: |-
+      {% if is_state('switch.lave_linge', 'on') %}
+        Marche
+      {% else %}
+        Arrêt
+      {% endif %}
+    secondary: ''
+    icon: |-
+      {% if is_state('switch.lave_linge', 'on') %}
+        mdi:washing-machine
+      {% else %}
+        mdi:washing-machine-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('switch.lave_linge', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-entity-card
+    entity: sensor.lave_linge_power
+    layout: vertical
+    primary_info: state
+    icon_color: amber
+    tap_action:
+      action: more-info
+    secondary_info: none
+  - type: custom:mushroom-entity-card
+    entity: input_text.device_duration_2
+    icon: mdi:camera-timer
+    layout: vertical
+    primary_info: state
+    name: Mn
+    tap_action:
+      action: more-info
+    icon_color: amber
+    secondary_info: none
+  - type: custom:mushroom-template-card
+    primary: Seche Linge
+    secondary: ''
+    entity: input_boolean.device_request_3
+    icon: |-
+      {% if is_state('input_boolean.device_request_3', 'on') %}
+        mdi:toggle-switch
+      {% else %}
+        mdi:toggle-switch-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('input_boolean.device_request_3', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: switch.seche_linge
+    primary: |-
+      {% if is_state('switch.seche_linge', 'on') %}
+        Marche
+      {% else %}
+        Arrêt
+      {% endif %}
+    secondary: ''
+    icon: |-
+      {% if is_state('switch.seche_linge', 'on') %}
+        mdi:tumble-dryer
+      {% else %}
+        mdi:tumble-dryer-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('switch.seche_linge', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-entity-card
+    entity: sensor.seche_linge_power
+    layout: vertical
+    primary_info: state
+    icon_color: amber
+    tap_action:
+      action: more-info
+    secondary_info: none
+  - type: custom:mushroom-entity-card
+    entity: input_text.device_duration_3
+    icon: mdi:camera-timer
+    layout: vertical
+    primary_info: state
+    name: Mn
+    tap_action:
+      action: more-info
+    icon_color: amber
+    secondary_info: none
+  - type: custom:mushroom-template-card
+    primary: PAC
+    secondary: ''
+    entity: input_boolean.device_request_4
+    icon: |-
+      {% if is_state('input_boolean.device_request_4', 'on') %}
+        mdi:toggle-switch
+      {% else %}
+        mdi:toggle-switch-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('input_boolean.device_request_4', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: switch.relai_pac
+    primary: |-
+      {% if is_state('switch.relai_pac', 'on') %}
+        Marche
+      {% else %}
+        Arrêt
+      {% endif %}
+    secondary: ''
+    icon: |-
+      {% if is_state('switch.relai_pac', 'on') %}
+        mdi:hvac
+      {% else %}
+        mdi:hvac-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('switch.relai_pac', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-entity-card
+    entity: sensor.pac_puissance
+    layout: vertical
+    primary_info: state
+    icon_color: amber
+    tap_action:
+      action: more-info
+    secondary_info: none
+  - type: custom:mushroom-entity-card
+    entity: input_text.device_duration_4
+    icon: mdi:camera-timer
+    layout: vertical
+    primary_info: state
+    name: Mn
+    tap_action:
+      action: more-info
+    icon_color: amber
+    secondary_info: none
+  - type: custom:mushroom-template-card
+    primary: Piscine
+    secondary: ''
+    entity: input_boolean.device_request_5
+    icon: |-
+      {% if is_state('input_boolean.device_request_5', 'on') %}
+        mdi:toggle-switch
+      {% else %}
+        mdi:toggle-switch-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('input_boolean.device_request_5', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: switch.piscine_pompe_filtration
+    primary: |-
+      {% if is_state('switch.piscine_pompe_filtration', 'on') %}
+        Marche
+      {% else %}
+        Arrêt
+      {% endif %}
+    secondary: ''
+    icon: |-
+      {% if is_state('switch.piscine_pompe_filtration', 'on') %}
+        mdi:pump
+      {% else %}
+        mdi:pump-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('switch.piscine_pompe_filtration', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-entity-card
+    entity: sensor.piscine_puissance
+    layout: vertical
+    primary_info: state
+    icon_color: amber
+    tap_action:
+      action: more-info
+    secondary_info: none
+  - type: custom:mushroom-entity-card
+    entity: input_text.device_duration_5
+    icon: mdi:camera-timer
+    layout: vertical
+    primary_info: state
+    name: Mn
+    tap_action:
+      action: more-info
+    icon_color: amber
+    secondary_info: none
+  - type: custom:mushroom-template-card
+    primary: Ch. Voiture
+    secondary: ''
+    entity: input_boolean.device_request_6
+    icon: |-
+      {% if is_state('input_boolean.device_request_6', 'on') %}
+        mdi:toggle-switch
+      {% else %}
+        mdi:toggle-switch-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('input_boolean.device_request_6', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-template-card
+    entity: switch.ev_charging
+    primary: |-
+      {% if is_state('switch.switch.ev_charging', 'on') %}
+        Marche
+      {% else %}
+        Arrêt
+      {% endif %}
+    secondary: ''
+    icon: |-
+      {% if is_state('switch.ev_charging', 'on') %}
+        mdi:car-electric-outline
+      {% else %}
+        mdi:car-off
+      {% endif %}
+    icon_color: |-
+      {% if is_state('switch.ev_charging', 'on') %}
+        green
+      {% else %}
+        grey
+      {% endif %}
+    layout: vertical
+    tap_action:
+      action: toggle
+    hold_action:
+      action: more-info
+  - type: custom:mushroom-entity-card
+    entity: sensor.ev_charging_power
+    layout: vertical
+    primary_info: state
+    icon_color: amber
+    tap_action:
+      action: more-info
+    secondary_info: none
+  - type: custom:mushroom-entity-card
+    entity: input_text.device_duration_6
+    icon: mdi:camera-timer
+    layout: vertical
+    primary_info: state
+    name: Mn
+    tap_action:
+      action: more-info
+    icon_color: amber
+    secondary_info: none
+columns: 4

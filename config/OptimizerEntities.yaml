@@ -1,0 +1,61 @@
+input_boolean:
+    device_request_1:
+        name: Device request 1
+    device_request_2:
+        name: Device request 2
+    device_request_3:
+        name: Device request 3
+    device_request_4:
+        name: Device request 4
+    device_request_5:
+        name: Device request 5
+    device_request_6:
+        name: Device request 6
+    device_request_7:
+        name: Device request 7
+    device_request_8:
+        name: Device request 8
+
+    start_device_1:
+        name: Start device 1
+    start_device_2:
+        name: Start device 2
+    start_device_3:
+        name: Start device 3
+    start_device_4:
+        name: Start device 4
+    start_device_5:
+        name: Start device 5
+    start_device_6:
+        name: Start device 6
+    start_device_7:
+        name: Start device 7
+    start_device_8:
+        name: Start device 8
+
+input_text:
+  device_duration_1:
+    name: "Device duration 1"
+    initial: "0"
+  device_duration_2:
+    name: "Device duration 2"
+    initial: "0"
+  device_duration_3:
+    name: "Device duration 3"
+    initial: "0"
+  device_duration_4:
+    name: "Device duration 4"
+    initial: "0"
+  device_duration_5:
+    name: "Device duration 5"
+    initial: "0"
+  device_duration_6:
+    name: "Device duration 6"
+    initial: "0"
+  device_duration_7:
+    name: "Device duration 7"
+    initial: "0"
+  device_duration_8:
+    name: "Device duration 8"
+    initial: "0"
+
