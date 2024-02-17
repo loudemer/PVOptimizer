@@ -1,5 +1,5 @@
 # PVOptimizer
-Cette intégration permet de maximiser l’auto consommation de la production d’énergie de vos panneaux solaires. Elle permet de contrôler les gros appareils électroménagers, tels que lave-vaisselle ou lave-linge avec de simples switch, mais aussi des appareils plus complexes à gérer, tels que la filtration de piscine ou le contrôle de pompe à chaleur au travers d’applications communicantes dédiées nécessitant des mécanismes de contrôle multiparamétriques.
+Cette application Appdaemon de Home Assistant permet de maximiser l’auto consommation de la production d’énergie de vos panneaux solaires. Elle permet de contrôler les gros appareils électroménagers, tels que lave-vaisselle ou lave-linge avec de simples switch, mais aussi des appareils plus complexes à gérer, tels que la filtration de piscine ou le contrôle de pompe à chaleur au travers d’applications communicantes dédiées nécessitant des mécanismes de contrôle multiparamétriques.
 
 Elle est écrite en python sous appdaemon et devrait être facilement accessible à ceux qui ont des notions de programmation. Ce qui devrait permettre de la modifier facilement pour l’améliorer et l’adapter à ses propres besoins.
 
@@ -18,7 +18,7 @@ Elle est écrite en python sous appdaemon et devrait être facilement accessible
 Elle se mesure à l’aide d’une pince ampèremétrique branchée sur le câble d’alimentation de la maison. Cette mesure peut être positive en cas de prélèvement sur le réseau ou négative en cas d’exportation. Si vous disposez d’un routeur ECS, il faut pouvoir disposer de la puissance envoyée sur le ballon, afin d’avoir la puissance solaire disponible, exacte.
 P disponible = P export + P ballon ECS.
 ## Couleur du jour pour les abonnements tempo
-On peut utiliser l’API RTE[https://www.api-couleur-tempo.fr/api] par exemple. 
+On peut utiliser l’[API RTE](https://www.api-couleur-tempo.fr/api) par exemple. 
 
 # Fonctionnement
 Chaque appareil est décrit dans l’application par :
@@ -42,7 +42,7 @@ Pour ceux qui ont un abonnement tempo, l’optimiseur ne fonctionne pas les jour
 
 # Installation
 1. Installer **l’add-on appdaemon** à partir de paramètres / modules complémentaires si cela n’est pas déjà fait.
-2. **[Télécharger le dépôt]https://github.com/loudemer/PVOptimizer.git**
+2. **[Télécharger le dépôt](https://github.com/loudemer/PVOptimizer.git)**
 3. Mettre les fichiers *PVOptimizer.py et PVOptimiser.yaml* dans le répertoire *addon\_configs/a0d7b954\_appdaemon/apps*
 4. Mettre le fichier *optimizerentities.yaml* dans le répertoire */config/* de HA ou dans un sous répertoire dédié au fichiers yaml si vous en avez un.
 
