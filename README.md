@@ -1,146 +1,145 @@
-# PVOptimizer
-Cette intégration permet de maximiser l’auto consommation de la production d’énergie de vos panneaux solaires. Elle permet de contrôler les gros appareils électroménagers, tels que lave-vaisselle ou lave-linge avec de simples switch, mais aussi des appareils plus complexes à gérer, tels que la filtration de piscine ou le contrôle de pompe à chaleur au travers d’applications communicantes dédiées nécessitant des mécanismes de contrôle multiparamétriques.
+# PV Optimizer
 
-Elle est écrite en python sous appdaemon et devrait être facilement accessible à ceux qui ont des notions de programmation. Ce qui devrait permettre de la modifier facilement pour l’améliorer et l’adapter à ses propres besoins.
+This integration allows you to maximize the self-consumption of the energy production of your solar panels. It allows you to control large household appliances, such as dishwashers or washing machines with simple switches, but also more complex devices to manage, such as swimming pool filtration or heat pump control through applications. dedicated communicating systems requiring multiparametric control mechanisms.
 
-# Caractéristiques
-- Prise en compte des abonnements : Tempo, Heures Creuses, Base
-- Prise en compte du prix de revente EDF, OA
-- Calcul du seuil de déclenchement des appareils en fonction du tarif heure creuse heure pleine et du prix de revente
-- Programmation automatique des appareils qui n’ont pu être mise en route dans la journée en heure creuse la nuit.
-- Peut fonctionner avec un routeur de ballon d’eau chaude, s’il est possible de récupérer la puissance instantanée, délivrée à ce dernier. L’adjonction d’un routeur est même recommandée.
-- Permet de contrôler des systèmes complexes, type filtration de piscine, ou pompe à chaleur, au travers d’applications séparées qui dialoguent avec l’optimiseur.
+It is written in python under appdaemon (Home Assistant) and should be easily accessible to those who have some knowledge of programming. This should make it easy to modify to improve it and adapt it to your own needs.
+# Features
+• Taking into account subscriptions: Tempo, Off-peak Hours, Base
+• Taking into account the French resale price EDF OA
+• Calculation of the device trigger threshold based on the off-peak hour rate and the resale price
+• Automatic programming of devices that could not be started during the day during off-peak hours at night.
+• Can work with a hot water tank router, if it is possible to recover the instantaneous power delivered to the latter. The addition of a router is even recommended.
+• Allows you to control complex systems, such as swimming pool filtration or heat pumps, through separate applications which communicate with the optimizer.
+# Prerequisites
+- Home Assistant appdaemon add-on installed
+- Solar power sensor in Watt available
+- It is measured using a current clamp connected to the house power cable. This measure can be positive in the case of withdrawal from the network or negative in the case of export. If you have an ECS router, you must be able to have the power sent to the tank, in order to have the exact available solar power
+  P available = P export + P ballon.
+- Color of the day for French tempo subscriptions. You can use the integration without this kind of subscription leave “” for the sensor name
+- You can use the RTE API for example. https://www.api-couleur-tempo.fr/api.
+# Functioning
+Each device is described in the application by:
+- his name,
+- his power,
+- its operating time,
+- the device switch sensor,
+- the off-peak start-up time if necessary.
 
-# Prérequis
+The program collects the available solar power every minute. 
+It shuts down devices that have reached their scheduled run time and attempts to turn on waiting devices based on available power.
+The device is started from a power threshold, which depends on the operating cost compared to that of off-peak hours.
 
-## Installation de l’add-on appdaemon
-## Puissance solaire disponible 
-Elle se mesure à l’aide d’une pince ampèremétrique branchée sur le câble d’alimentation de la maison. Cette mesure peut être positive en cas de prélèvement sur le réseau ou négative en cas d’exportation. Si vous disposez d’un routeur ECS, il faut pouvoir disposer de la puissance envoyée sur le ballon, afin d’avoir la puissance solaire disponible, exacte.
-P disponible = P export + P ballon ECS.
-## Couleur du jour pour les abonnements tempo
-On peut utiliser l’API RTE[https://www.api-couleur-tempo.fr/api] par exemple. 
+The calculation of the power threshold necessary for startup is done according to the formula:
+P threshold = P device \* (1-(HC price – Buyback price) / HP price).
+This mode allows you to lower the starting power and see if it is better to start during the day or during off-peak hours.
 
-# Fonctionnement
-Chaque appareil est décrit dans l’application par :
-- son nom, 
-- sa puissance, 
-- sa durée de fonctionnement, 
-- le switch qui le commande, 
-- l’heure de mise en route en heure creuse si nécessaire.
+In the event of limited solar production due to cloud cover, the system schedules all devices that could not be started during off-peak hours at night at the times defined in the configuration file.
 
-Le programme effectue toutes les minutes, un recueil de la puissance solaire disponible. Il arrête les appareils qui ont atteint leur durée de fonctionnement programmée et essaie de mettre en route les appareils en attente en fonction de la puissance disponible.
+When a device is started, it completes its entire cycle, even if the available solar power decreases. Indeed, for example, it does not make sense to stop a dishwasher or washing machine in the middle of a cycle.
 
-La mise en route de l’appareil se fait à partir d’un seuil de puissance, qui dépend du coût de fonctionnement comparé à celui des heures creuses.Le calcul du seuil de puissance nécessaire à la mise en route, se fait selon la formule :
-P seuil = P appareil \* (1-(Prix HC – Prix rachat) / Prix HP).
-Cette modalité permet d’abaisser la puissance de mise en route et de voir s’il est plus avantageux de démarrer de jour ou en heures creuses
-
-En cas de production solaire limitée du fait de la couverture nuageuse, le système programme, tous les appareils qui n’ont pu être mis en route pendant les heures creuses la nuit aux horaires définis dans le fichier de configuration.
-
-Lorsqu’un appareil est mis en route, il effectue la totalité de son cycle, même si la puissance solaire disponible diminue. En effet, par exemple, il n’est pas logique d’arrêter un lave-vaisselle ou lave-linge en plein cycle.
-
-Pour ceux qui ont un abonnement tempo, l’optimiseur ne fonctionne pas les jours rouges afin d’éviter des dépenses importantes liées à des diminutions de production solaire.
+For those who have a Tempo subscription, the optimizer does not work on red days in order to avoid significant expenses linked to reductions in solar production.
 
 # Installation
-1. Installer **l’add-on appdaemon** à partir de paramètres / modules complémentaires si cela n’est pas déjà fait.
-2. **[Télécharger le dépôt]https://github.com/loudemer/PVOptimizer.git**
-3. Mettre les fichiers *PVOptimizer.py et PVOptimiser.yaml* dans le répertoire *addon\_configs/a0d7b954\_appdaemon/apps*
-4. Mettre le fichier *optimizerentities.yaml* dans le répertoire */config/* de HA ou dans un sous répertoire dédié au fichiers yaml si vous en avez un.
-
+1. Install appdaemon add-on from settings / add-ons if not already done.
+2. Download the repository[https://github.com/loudemer/PVOptimizer.git]
+3. Put the PVOptimizer.py and PVOptimiser.yaml files in the addon_configs/a0d7b954_appdaemon/apps directory
+4. Put the optimizerentities.yaml file in the /config/ directory of HA or in a subdirectory dedicated to yaml files if you have one.
 # Configuration
-1. Ajouter dans le fichier addon\_configs/a0d7b954\_appdaemon/appdaemon.yaml
-  
- ```yaml  
-        pvoptimizer_log :
-          name: PVOptimizerLog
-          filename: /homeassistant/log/pvoptimizer.log
-          log_generations: 3
-          log_size: 100000 
+1\ Add in addon_configs/a0d7b954_appdaemon/appdaemon.yaml file
+
+``` pvoptimizer_log:
+      name: PVOptimizerLog
+      filename: /homeassistant/log/pvoptimizer.log
+      log_generations: 3
+      log_size: 100000
 ```
-   Ceci vous permet de lire les log de l’application dans le fichier /config/ pvoptimizer\_log
-   ou directement dans http://ip\_ha:5050
+This allows you to read the application logs in the /config/pvoptimizer\_log file or directly in appdaemon web server : http://<ip\_ha>:5050
 
-2. **Compléter** le fichier /addon\_configs/a0d7b954\_appdaemon/apps/PVOptimiser.yaml :
-   a. nom de votre sensor qui donne l’énergie solaire disponible dans ‘**available\_energy :’**
-   b. type d’abonnement électrique dans **‘subscription :’**
-      *Tempo, HeuresCreuses, Base*
-   c. sensor qui donne la couleur du jour tempo dans ‘**journée\_tempo :’**
-      mettre deux double quote si vous avez un autre type d’abonnement
-   d. **les prix du Kwh** en Centimes ou en Euros. Pour un abonnement Heures creuses mettre les prix : prix\_bleu\_hc et prix\_bleu\_hp.
+2\. Complete the /addon\_configs/a0d7b954\_appdaemon/apps/PVOptimiser.yaml file:
 
-3. **Décrire chaque appareil dans ‘my\_devices :’** en respectant bien l’indentation comme décrite ci-dessous. Le fichier est prérempli avec un appareil à titre d’exemple que vous pouvez modifier.
+1) name of your sensor which gives the solar energy available in ‘available\_energy:’
+1) type of electricity subscription in ‘subscription:’ must be : Tempo, HeuresCreuses(Off-peak Hours), Base
+1) journee\_tempo. sensor which gives the color of the tempo day in ‘tempo\_day:’ put two double quotes if you have another type of subscription
+1) Kwh prices in Cents or Euros. For an off-peak hours subscription, enter the prices: prix\_bleu\_hc and prix\_bleu\_hp.
 
-```yaml  
-     my_devices:
-       lave_vaisselle:
-         name: lave_vaisselle
-         power: 2000
-         duration: 180
-         switch_entity: switch.lave_vaisselle
-         night_time_on: "00:30:00"    
+3\. Describe each device in ‘my\_devices:’ respecting the indentation as described below. The file is pre-populated with 2 example devices that you can edit.
+
+``` my_devices:
+      dishwasher:
+        name: dishwasher
+        power: 2000
+        duration: 180
+        switch_entity: switch.dishwasher
+        night_time_on: "00:30:00"
+      dryer:
+        name: dryer
+        power: 2500
+        duration: 90
+        switch_entity: switch.dryer
+        night_time_on: "03:00:00"
 ```
-La puissance( power) est en Watt, 
-la durée (duration) en minutes, 
-l’heure de mise en route (night\_time\_on) doit être mise à None s’il s’agit d’une autre application type filtration piscine par exemple. 
+The power is in Watt, the duration in minutes, the start-up time must be None if it is another application such as swimming pool filtration for example.
 
-4. **Recharger la configuration yaml**  dans outils/toute la configuration 
-5. **Créer le dashboard de contrôle des appareils** ou adapter celui donné dans le dépôt.
+4\. Reload the yaml configuration in tools/all configuration
 
-# Le Dashboard
-A titre d’exemple vous trouverez dans le dépôt un fichier yaml d’exemple de configuration de base tout à fait perfectible.
-Il contient 4 entités par appareil :
-- La demande de mise en route : *input\_boolean.device\_request\_1*,
-- Le sensor switch de commande de l’appareil *switch.<appareil>* ,
-- Le sensor power de l’appareil *sensor.<power appareil>*
-- Le sensor de durée d’exécution : *input\_text.device\_duration\_1*.
+5\. Create the device control dashboard or adapt the one given in the repository.
+# The Dashboard
+As an example, you will find in the repository a basic configuration example yaml file that can be improved.
 
-Les sensors *input\_boolean.device\_request\_x* et *input\_text.device\_duration\_x* sont prédéfinis dans le fichier optimizerentities.yaml. x correspond au rang de définition de l’appareil .
-Il faudra ajouter une entrée sur le dashboard pour le sensor *input\_boolean. enable\_solar\_optimizer*** qui permet de désactiver l’application si nécessaire.
+It contains 4 entities per device:
+• The startup request: input\_boolean.device\_request\_1,
+• The sensor switch controlling the device switch.<device>,
+• The sensor power of the sensor device.<power device>
+• The execution duration sensor: input\_text.device\_duration\_1.
 
-# Mode d’emploi de base
-Une fois l’installation réalisée, l’intégration est opérationnelle.
-Cette partie concerne les appareils qui sont uniquement commandés par un switch
+The input_boolean.device_request_x and input_text.device_duration_x sensors are predefined in the optimizerentities.yaml file. x for the definition rank of the device.
+You will need to add an entry on the dashboard for the sensor input_boolean. enable_solar_optimizer which allows you to deactivate the application if necessary.
 
-## Activation d’un appareil
-Pour effectuer une demande de mise en route d’un appareil, il suffit de cliquer sur le premier sensor (Request).
-Si l’énergie solaire disponible est suffisante, le switch de l’appareil va être activé, la puissance délivrée va s’afficher et le décompte du temps d’exécution va débuter et s’afficher toutes les minutes.
-Il est possible de forcer le démarrage d’un appareil, même si la puissance solaire disponible n’est pas suffisante en cliquant directement sur le switch. Les entités de l’appareil s’afficheront alors comme si le démarrage avait été effectué par l’intégration.
+# Basic instructions for use
+Once the installation is complete, the integration is operational.
+This part concerns devices which are only controlled by a switch sensor.
 
-## Arrêt d’un appareil
-L’appareil va s’arrêter lorsque le temps d’exécution planifié sera écoulé. On peut forcer l’arrêt en cliquant sur le switch.
+## Activating a device
+To request the activation of a device, simply click on the first sensor (Request).
+If the available solar energy is enough, the device switch will be activated, the power delivered will be displayed and the execution time will begin to count down and be displayed every minute.
+It is possible to force the start of a device, even if the available solar power is not enough, by clicking directly on the switch. The device entities will then be displayed as if the startup had been carried out by the integration.
+## Shutting down a device
+The device will shut down when the scheduled run time has elapsed. You can force the shutdown by clicking on the switch.
 
-## Programmation en heure creuse
-Tous les appareils pour lesquels une demande n’a pas été satisfaite dans la journée, faute d’énergie suffisante sont automatiquement reprogrammés la nuit en heure creuse. 
-Pour cela il faut veiller à mettre dans la configuration des horaires de démarrage en période creuse.
+## Off-peak programming
+All devices for which a request has not been satisfied during the day due to lack of sufficient energy are automatically reprogrammed at night during off-peak hours.
+To do this, you must ensure that you configure start times during off-peak periods.
 
-## Visualisation des problèmes éventuels
-L’intégration génère un fichier de log qui est stocké dans le fichier /config/log/pvoptimizer.log.
-Il est possible aussi d’avoir plus de détails en appelant directement la console de debug d’appdaemon : http://<ip_homeassistant>:5050
+## Visualizing problems
+The integration generates a log file which is stored in the /config/log/pvoptimizer.log file.
+It is also possible to have more details by directly calling the appdaemon debug console: http://<ip_homeassistant>:5050
 
-Vous pourrez alors voir le démarrage et l’arrêt de l’intégration dans *main\_log*, les erreurs éventuelles dans *error\_log* et le déroulement de l’activité de l’intégration dans *pvoptimizer\_log*.
+You will then be able to see the start and stop of the integration in main_log, any errors in error_log and the progress of the integration activity in pvoptimizer_log.
 
-# Utilisation avancée
-L’intégration, PVOptimizer permet de piloter des appareils qui nécessitent des paramètres de régulation supplémentaires.
+# Advanced use
+The integration, PVOptimizer makes it possible to control devices that require additional control parameters.
 
-Par exemple, pour une piscine, il faut prendre en compte la température de l’eau pour déterminer la durée et le séquencement des cycles de filtration journalière.
-Pour cela, il est plus simple de piloter le fonctionnement de l’appareil dans une application appdaemon séparée qui communique avec PVOptimizer.
-L’application séparée va alors demander la mise en route de l’appareil auprès de PVOptimizer en basculant *input\_boolean.device\_request\_x* à true.
+For example, for a swimming pool, the water temperature must be taken into account to determine the duration and sequencing of the daily filtration cycles.
+To do this, it is simpler to control the operation of the device in a separate appdaemon application which communicates with PVOptimizer.
 
-PVOptimizer va alors donner l’autorisation d’activation en basculant *input\_boolean.start.device\_x* à true. 
-L’application séparée va alors gérer le fonctionnement de l’appareil et l’arrêter si besoin avant le délai imparti. 
-Elle pourra demander au besoin ultérieurement d’autres mises en route.
+The separate application will then request the activation of the device from PVOptimizer by switching input_boolean.device_request_x to true.
 
-Trois applications sont actuellement en cours d’évaluation :
-- Filtration de piscine traitée à l’oxygène actif,
-- Pompe à chaleur Air-eau avec plancher chauffant
-- Charge de véhicule électrique sans palier
-Elles seront publiées prochainement dans mon dépôt.
+PVOptimizer will then give activation permission by toggling input_boolean.start.device_x to true. 
+The separate application will then manage the operation of the device and stop it if necessary before the allotted time. It may subsequently request other start-ups if necessary.
 
-# Désinstallation
-Il faut retirer les 2 fichiers *PVOptimizer.py et PVOptimiser.yaml* dans le répertoire *addon\_configs/a0d7b954\_appdaemon/apps/*
-Puis le fichier *optimizerentities.yaml* dans le répertoire */config/* de HA,
-Retirer aussi le dashboard PVOptimizer
-Redémarrer HA.
+Three applications are currently being evaluated:
 
-# Performances
-L’intégration tourne depuis 4 mois avec une installation solaire de 3 KWc. 
-Pour l’instant je suis à 95% d’autoconsommation. Il reste à évaluer le comportement en été.
+- Swimming pool filtration treated with active oxygen,
+- Air-water heat pump with heated floor
+- Stepless electric vehicle charging
+
+They will be published soon in my repository.
+
+# Uninstallation
+You must remove both files PVOptimizer.py and PVOptimiser.yaml in the addon\_configs/a0d7b954\_appdaemon/apps/ directory.
+Then the optimizerentities.yaml file in the /config/ directory of HA,
+Also remove the PVOptimizer dashboard
+Restart HA.
+
+# Performance
+The integration has been running for 4 months with a 3 KWp installation. For the moment I am at 95% self-consumption. It remains to evaluate the behavior in summer.
