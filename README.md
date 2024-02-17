@@ -5,10 +5,15 @@ This integration allows you to maximize the self-consumption of the energy produ
 It is written in python under appdaemon (Home Assistant) and should be easily accessible to those who have some knowledge of programming. This should make it easy to modify to improve it and adapt it to your own needs.
 # Features
 • Taking into account subscriptions: Tempo, Off-peak Hours, Base
+
 • Taking into account the French resale price EDF OA
+
 • Calculation of the device trigger threshold based on the off-peak hour rate and the resale price
+
 • Automatic programming of devices that could not be started during the day during off-peak hours at night.
+
 • Can work with a hot water tank router, if it is possible to recover the instantaneous power delivered to the latter. The addition of a router is even recommended.
+
 • Allows you to control complex systems, such as swimming pool filtration or heat pumps, through separate applications which communicate with the optimizer.
 # Prerequisites
 - Home Assistant appdaemon add-on installed
