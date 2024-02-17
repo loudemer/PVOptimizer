@@ -5,7 +5,7 @@ Elle est écrite en python sous appdaemon et devrait être facilement accessible
 
 # Caractéristiques
 - Prise en compte des abonnements : Tempo, Heures Creuses, Base
-- Prise en compte du prix de revente EDF, OA
+- Prise en compte du prix de revente EDF OA
 - Calcul du seuil de déclenchement des appareils en fonction du tarif heure creuse heure pleine et du prix de revente
 - Programmation automatique des appareils qui n’ont pu être mise en route dans la journée en heure creuse la nuit.
 - Peut fonctionner avec un routeur de ballon d’eau chaude, s’il est possible de récupérer la puissance instantanée, délivrée à ce dernier. L’adjonction d’un routeur est même recommandée.
@@ -16,7 +16,7 @@ Elle est écrite en python sous appdaemon et devrait être facilement accessible
 ## Installation de l’add-on appdaemon
 ## Puissance solaire disponible 
 Elle se mesure à l’aide d’une pince ampèremétrique branchée sur le câble d’alimentation de la maison. Cette mesure peut être positive en cas de prélèvement sur le réseau ou négative en cas d’exportation. Si vous disposez d’un routeur ECS, il faut pouvoir disposer de la puissance envoyée sur le ballon, afin d’avoir la puissance solaire disponible, exacte.
-P disponible = P export + P ballon ECS.
+`P disponible = P export + P ballon ECS`.
 ## Couleur du jour pour les abonnements tempo
 On peut utiliser l’[API RTE](https://www.api-couleur-tempo.fr/api) par exemple. 
 
@@ -31,7 +31,8 @@ Chaque appareil est décrit dans l’application par :
 Le programme effectue toutes les minutes, un recueil de la puissance solaire disponible. Il arrête les appareils qui ont atteint leur durée de fonctionnement programmée et essaie de mettre en route les appareils en attente en fonction de la puissance disponible.
 
 La mise en route de l’appareil se fait à partir d’un seuil de puissance, qui dépend du coût de fonctionnement comparé à celui des heures creuses.Le calcul du seuil de puissance nécessaire à la mise en route, se fait selon la formule :
-P seuil = P appareil \* (1-(Prix HC – Prix rachat) / Prix HP).
+
+`P seuil = P appareil \* (1-(Prix HC – Prix rachat) / Prix HP)`.
 Cette modalité permet d’abaisser la puissance de mise en route et de voir s’il est plus avantageux de démarrer de jour ou en heures creuses
 
 En cas de production solaire limitée du fait de la couverture nuageuse, le système programme, tous les appareils qui n’ont pu être mis en route pendant les heures creuses la nuit aux horaires définis dans le fichier de configuration.
@@ -47,7 +48,7 @@ Pour ceux qui ont un abonnement tempo, l’optimiseur ne fonctionne pas les jour
 4. Mettre le fichier *optimizerentities.yaml* dans le répertoire */config/* de HA ou dans un sous répertoire dédié au fichiers yaml si vous en avez un.
 
 # Configuration
-1. Ajouter dans le fichier addon\_configs/a0d7b954\_appdaemon/appdaemon.yaml
+1. Ajouter dans le fichier `addon\_configs/a0d7b954\_appdaemon/appdaemon.yaml`
   
  ```yaml  
         pvoptimizer_log :
@@ -56,18 +57,18 @@ Pour ceux qui ont un abonnement tempo, l’optimiseur ne fonctionne pas les jour
           log_generations: 3
           log_size: 100000 
 ```
-   Ceci vous permet de lire les log de l’application dans le fichier /config/ pvoptimizer\_log
-   ou directement dans http://ip\_ha:5050
+   Ceci vous permet de lire les log de l’application dans le fichier `/config/ pvoptimizer_log`
+   ou directement dans `http://ip_ha:5050`
 
-2. **Compléter** le fichier /addon\_configs/a0d7b954\_appdaemon/apps/PVOptimiser.yaml :
-   a. nom de votre sensor qui donne l’énergie solaire disponible dans ‘**available\_energy :’**
-   b. type d’abonnement électrique dans **‘subscription :’**
+2. **Compléter** le fichier `/addon_configs/a0d7b954_appdaemon/apps/PVOptimiser.yaml` :
+   a. nom de votre sensor qui donne l’énergie solaire disponible dans `available_energy :`
+   b. type d’abonnement électrique dans `subscription :`
       *Tempo, HeuresCreuses, Base*
-   c. sensor qui donne la couleur du jour tempo dans ‘**journée\_tempo :’**
+   c. sensor qui donne la couleur du jour tempo dans `journée_tempo :`
       mettre deux double quote si vous avez un autre type d’abonnement
-   d. **les prix du Kwh** en Centimes ou en Euros. Pour un abonnement Heures creuses mettre les prix : prix\_bleu\_hc et prix\_bleu\_hp.
+   d. **les prix du Kwh** en Centimes ou en Euros. Pour un abonnement Heures creuses mettre les prix : `prix_bleu_hc` et `prix_bleu_hp`.
 
-3. **Décrire chaque appareil dans ‘my\_devices :’** en respectant bien l’indentation comme décrite ci-dessous. Le fichier est prérempli avec un appareil à titre d’exemple que vous pouvez modifier.
+3. **Décrire chaque appareil dans `my_devices :` en respectant bien l’indentation comme décrite ci-dessous. Le fichier est prérempli avec un appareil à titre d’exemple que vous pouvez modifier.
 
 ```yaml  
      my_devices:
@@ -80,7 +81,7 @@ Pour ceux qui ont un abonnement tempo, l’optimiseur ne fonctionne pas les jour
 ```
 La puissance( power) est en Watt, 
 la durée (duration) en minutes, 
-l’heure de mise en route (night\_time\_on) doit être mise à None s’il s’agit d’une autre application type filtration piscine par exemple. 
+l’heure de mise en route `night_time_on` doit être mise à None s’il s’agit d’une autre application type filtration piscine par exemple. 
 
 4. **Recharger la configuration yaml**  dans outils/toute la configuration 
 5. **Créer le dashboard de contrôle des appareils** ou adapter celui donné dans le dépôt.
@@ -88,13 +89,13 @@ l’heure de mise en route (night\_time\_on) doit être mise à None s’il s’
 # Le Dashboard
 A titre d’exemple vous trouverez dans le dépôt un fichier yaml d’exemple de configuration de base tout à fait perfectible.
 Il contient 4 entités par appareil :
-- La demande de mise en route : *input\_boolean.device\_request\_1*,
-- Le sensor switch de commande de l’appareil *switch.<appareil>* ,
-- Le sensor power de l’appareil *sensor.<power appareil>*
-- Le sensor de durée d’exécution : *input\_text.device\_duration\_1*.
+- La demande de mise en route : `input_boolean.device_request_1`,
+- Le sensor switch de commande de l’appareil `switch.<appareil>` ,
+- Le sensor power de l’appareil `sensor.<power appareil>`
+- Le sensor de durée d’exécution : `input_text.device_duration_1`.
 
-Les sensors *input\_boolean.device\_request\_x* et *input\_text.device\_duration\_x* sont prédéfinis dans le fichier optimizerentities.yaml. x correspond au rang de définition de l’appareil .
-Il faudra ajouter une entrée sur le dashboard pour le sensor *input\_boolean. enable\_solar\_optimizer*** qui permet de désactiver l’application si nécessaire.
+Les sensors `input_boolean.device_request_x` et `input_text.device_duration_x` sont prédéfinis dans le fichier `optimizerentities.yaml`. x correspond au rang de définition de l’appareil .
+Il faudra ajouter une entrée sur le dashboard pour le sensor `input_boolean.enable_solar_optimizer` qui permet de désactiver l’application si nécessaire.
 
 # Mode d’emploi de base
 Une fois l’installation réalisée, l’intégration est opérationnelle.
@@ -113,19 +114,19 @@ Tous les appareils pour lesquels une demande n’a pas été satisfaite dans la 
 Pour cela il faut veiller à mettre dans la configuration des horaires de démarrage en période creuse.
 
 ## Visualisation des problèmes éventuels
-L’intégration génère un fichier de log qui est stocké dans le fichier /config/log/pvoptimizer.log.
-Il est possible aussi d’avoir plus de détails en appelant directement la console de debug d’appdaemon : http://<ip_homeassistant>:5050
+L’intégration génère un fichier de log qui est stocké dans le fichier `/config/log/pvoptimizer.log`.
+Il est possible aussi d’avoir plus de détails en appelant directement la console de debug d’appdaemon : `http://<ip_homeassistant>:5050`
 
-Vous pourrez alors voir le démarrage et l’arrêt de l’intégration dans *main\_log*, les erreurs éventuelles dans *error\_log* et le déroulement de l’activité de l’intégration dans *pvoptimizer\_log*.
+Vous pourrez alors voir le démarrage et l’arrêt de l’intégration dans `main_log`, les erreurs éventuelles dans `error_log` et le déroulement de l’activité de l’intégration dans `pvoptimizer_log`.
 
 # Utilisation avancée
 L’intégration, PVOptimizer permet de piloter des appareils qui nécessitent des paramètres de régulation supplémentaires.
 
 Par exemple, pour une piscine, il faut prendre en compte la température de l’eau pour déterminer la durée et le séquencement des cycles de filtration journalière.
 Pour cela, il est plus simple de piloter le fonctionnement de l’appareil dans une application appdaemon séparée qui communique avec PVOptimizer.
-L’application séparée va alors demander la mise en route de l’appareil auprès de PVOptimizer en basculant *input\_boolean.device\_request\_x* à true.
+L’application séparée va alors demander la mise en route de l’appareil auprès de PVOptimizer en basculant `input_boolean.device_request_x` à true.
 
-PVOptimizer va alors donner l’autorisation d’activation en basculant *input\_boolean.start.device\_x* à true. 
+PVOptimizer va alors donner l’autorisation d’activation en basculant `input_boolean.start.device_x` à true. 
 L’application séparée va alors gérer le fonctionnement de l’appareil et l’arrêter si besoin avant le délai imparti. 
 Elle pourra demander au besoin ultérieurement d’autres mises en route.
 
@@ -136,8 +137,8 @@ Trois applications sont actuellement en cours d’évaluation :
 Elles seront publiées prochainement dans mon dépôt.
 
 # Désinstallation
-Il faut retirer les 2 fichiers *PVOptimizer.py et PVOptimiser.yaml* dans le répertoire *addon\_configs/a0d7b954\_appdaemon/apps/*
-Puis le fichier *optimizerentities.yaml* dans le répertoire */config/* de HA,
+Il faut retirer les 2 fichiers `PVOptimizer.py` et `PVOptimiser.yaml` dans le répertoire `addon_configs/a0d7b954_appdaemon/apps/`
+Puis le fichier `optimizerentities.yaml` dans le répertoire `/config/` de HA,
 Retirer aussi le dashboard PVOptimizer
 Redémarrer HA.
 
