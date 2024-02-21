@@ -11,6 +11,7 @@ Elle est écrite en python sous appdaemon et devrait être facilement accessible
 - Peut fonctionner avec un routeur de ballon d’eau chaude, s’il est possible de récupérer la puissance instantanée, délivrée à ce dernier. L’adjonction d’un routeur est même recommandée.
 - Permet de contrôler des systèmes complexes, type filtration de piscine, ou pompe à chaleur, au travers d’applications séparées qui dialoguent avec l’optimiseur.
 
+![Icon](https://github.com/loudemer/pvoptimizer/blob/main/images/applications.png?raw=true)
 # Prérequis
 
 ## Installation de l’add-on appdaemon
@@ -96,6 +97,8 @@ Il contient 4 entités par appareil :
 
 Les sensors `input_boolean.device_request_x` et `input_text.device_duration_x` sont prédéfinis dans le fichier `optimizerentities.yaml`. x correspond au rang de définition de l’appareil .
 Il faudra ajouter une entrée sur le dashboard pour le sensor `input_boolean.enable_solar_optimizer` qui permet de désactiver l’application si nécessaire.
+
+![Icon](https://github.com/loudemer/pvoptimizer/blob/main/images/dashboard-programmation.png?raw=true)
 
 # Mode d’emploi de base
 Une fois l’installation réalisée, l’intégration est opérationnelle.
