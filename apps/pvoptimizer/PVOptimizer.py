@@ -1,7 +1,7 @@
 ##############################################################################################
 # PVOptimizer
 # Author: Gerard Mamelle (2024)
-# Version : 1.0
+# Version : 1.0.1
 # Program under MIT licence
 ##############################################################################################
 import hassapi as hass
@@ -127,8 +127,6 @@ class PVOptimizer(hass.Hass):
             self.available_energy = self.update_current_grid_status()             
             # try to init new device request
             self.try_init_new_process()               
-            # try to stop active device process
-            self.try_stop_active_process()            
 
     # Reinit all request and start commands at sunrise
     def init_day(self, kwargs):                             
@@ -195,23 +193,21 @@ class PVOptimizer(hass.Hass):
                 if self.try_to_run(cur_device):
                     self.log(f'Start {cur_device.name}')
          
-    # Try to stop active device
-    def try_stop_active_process(self):                                              
-        for cur_device in self.device_list:
-            if cur_device.request == 'on' and cur_device.started == 'on':
-                if cur_device.task_duration > cur_device.min_duration :
-                    self.stop_device(cur_device)
-
     # Stop a device
     def stop_device(self, cur_device):
         self.log(f'Stop {cur_device.name}')
         self.set_state(cur_device.enable_entity, state="off")
-        self.update_task_duration(cur_device)
+        cur_device.request = 'off'
         cur_device.started = 'off'  
+        self.update_task_duration(cur_device)
+        # check if cur_device is a switch (night_time_on = None) 
+        # or an application (night_time_on = !None)
         if cur_device.night_time_on != 'None':
+            # switch
             self.turn_off(cur_device.switch_entity)
             self.log(f'switch {cur_device.name} off')
         else:
+            # application
             self.set_state(cur_device.start_entity, state="off")
             self.log(f'flag {cur_device.name} off')
  
@@ -252,16 +248,17 @@ class PVOptimizer(hass.Hass):
     # Try to start a device if available grid energy is 
     def try_to_run(self, cur_device) -> bool:
         power_mini = float(cur_device.power) * self.power_ratio
-        self.log(f'power mini  = {power_mini}, available power = {self.available_energy}')
+        power_mini = round(power_mini,1)
+        # self.log(f'power mini  = {power_mini}, available power = {self.available_energy}')
         if power_mini < float(self.available_energy):
             self.log(f'init start {cur_device.name}')
             self.start_device(cur_device)
             return True
         else:
-            self.log(f'device power {cur_device.name} is too high, waiting !')
+        #    self.log(f'device power {cur_device.name} is too high, waiting !')
             return False
 
-    # execution la nuit en HC des taches qui n'ont pu etre realisees le jour
+    # Call night schedule time for those tasks who were not executed during the day 
     def run_remaining_tasks(self,kwargs):
         self.log("Night Tasks")
         for cur_device in self.device_list:
@@ -274,11 +271,13 @@ class PVOptimizer(hass.Hass):
     def check_min_duration_ok(self, cur_device) -> bool:            
         return (bool(cur_device.task_duration > cur_device.min_duration)) 
    
+    # Get delay in minutes between 2 times
     def get_delay_minutes(self,recent: datetime, old: datetime) -> int:
         diff = recent - old
         minutes = diff.total_seconds() / 60
         return int(minutes)
 
+    # Update task duration if device is started otherwise reset duration
     def update_task_duration(self, cur_device):
         if cur_device.started == 'on':
             cur_device.task_duration = self.get_delay_minutes(self.get_now(), cur_device.start_time)
