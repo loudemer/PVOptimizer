@@ -1,3 +1,8 @@
+√[![GitHub Release][releases-shield]][releases]
+[![GitHub Activity][commits-shield]][commits]
+[![License][license-shield]](LICENSE)
+[![hacs][hacs_badge]][hacs]
+
 # PVOptimizer
 Cette application Appdaemon de Home Assistant permet de maximiser l’auto consommation de la production d’énergie de vos panneaux solaires. Elle permet de contrôler les gros appareils électroménagers, tels que lave-vaisselle ou lave-linge avec de simples switch, mais aussi des appareils plus complexes à gérer, tels que la filtration de piscine ou le contrôle de pompe à chaleur au travers d’applications communicantes dédiées nécessitant des mécanismes de contrôle multiparamétriques.
 
@@ -102,7 +107,10 @@ Il faudra ajouter une entrée sur le dashboard pour le sensor `input_boolean.ena
 
 # Mode d’emploi de base
 Une fois l’installation réalisée, l’intégration est opérationnelle.
-Cette partie concerne les appareils qui sont uniquement commandés par un switch
+Cette partie concerne les appareils qui sont uniquement commandés par un switch.
+
+Pour demander la mise en route d'un appareil, il faut cliquer sur l'icône de l'appareil, à gauche. Il passe du gris au vert.
+Si la production solaire est suffisante, l'appareil est mis en route, le deuxième icône devient vert et la puissance de fonctionnement s'affiche sur le 3eme icône et la durée de fonctionnement sur le 4ème icône.
 
 ## Activation d’un appareil
 Pour effectuer une demande de mise en route d’un appareil, il suffit de cliquer sur le premier sensor (Request).
@@ -133,12 +141,11 @@ PVOptimizer va alors donner l’autorisation d’activation en basculant `input_
 L’application séparée va alors gérer le fonctionnement de l’appareil et l’arrêter si besoin avant le délai imparti. 
 Elle pourra demander au besoin ultérieurement d’autres mises en route.
 
-Trois applications sont actuellement en cours d’évaluation :
-- Filtration de piscine traitée à l’oxygène actif,
-- Pompe à chaleur Air-eau avec plancher chauffant
-- Charge de véhicule électrique sans palier
-Elles seront publiées prochainement dans mon dépôt.
-
+Trois applications qui sont publiées dans mon dépôt :
+- **[Filtration de piscine](https://github.com/loudemer/pvpoolfiltration)** traitée à l’oxygène actif,
+- **[Pompe à chaleur Air-eau](https://github.com/loudemer/pvheatpump)** avec plancher chauffant
+- **[Charge de véhicule électrique](https://github.com/loudemer/pvheatpump)** sans palier
+  
 # Désinstallation
 Il faut retirer les 2 fichiers `PVOptimizer.py` et `PVOptimiser.yaml` dans le répertoire `addon_configs/a0d7b954_appdaemon/apps/`
 Puis le fichier `optimizerentities.yaml` dans le répertoire `/config/` de HA,
