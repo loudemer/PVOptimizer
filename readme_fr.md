@@ -1,7 +1,3 @@
-√[![GitHub Release][releases-shield]][releases]
-[![GitHub Activity][commits-shield]][commits]
-[![License][license-shield]](LICENSE)
-[![hacs][hacs_badge]][hacs]
 
 # PVOptimizer
 Cette application Appdaemon de Home Assistant permet de maximiser l’auto consommation de la production d’énergie de vos panneaux solaires. Elle permet de contrôler les gros appareils électroménagers, tels que lave-vaisselle ou lave-linge avec de simples switch, mais aussi des appareils plus complexes à gérer, tels que la filtration de piscine ou le contrôle de pompe à chaleur au travers d’applications communicantes dédiées nécessitant des mécanismes de contrôle multiparamétriques.
