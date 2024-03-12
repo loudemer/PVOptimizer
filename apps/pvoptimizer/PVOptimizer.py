@@ -1,7 +1,7 @@
 ##############################################################################################
 # PVOptimizer
 # Author: Gerard Mamelle (2024)
-# Version : 1.0.1
+# Version : 1.0.2
 # Program under MIT licence
 ##############################################################################################
 import hassapi as hass
@@ -180,7 +180,7 @@ class PVOptimizer(hass.Hass):
                     self.set_state(cur_device.start_entity, state="off")
                     cur_device.request = 'off'
                     cur_device.started = 'off'              
-                    cur_device.task_duration = 0
+                self.update_task_duration(cur_device)
             # Check if current started devices need to be stopped
             if cur_device.started == 'on':                                              
                 self.update_task_duration(cur_device)
@@ -197,6 +197,7 @@ class PVOptimizer(hass.Hass):
     def stop_device(self, cur_device):
         self.log(f'Stop {cur_device.name}')
         self.set_state(cur_device.enable_entity, state="off")
+        self.set_state(cur_device.start_entity, state="off")
         cur_device.request = 'off'
         cur_device.started = 'off'  
         self.update_task_duration(cur_device)
@@ -208,7 +209,6 @@ class PVOptimizer(hass.Hass):
             self.log(f'switch {cur_device.name} off')
         else:
             # application
-            self.set_state(cur_device.start_entity, state="off")
             self.log(f'flag {cur_device.name} off')
  
     # Start a device
@@ -216,7 +216,7 @@ class PVOptimizer(hass.Hass):
         self.log(f'Start {cur_device.name}')
         cur_device.started = 'on'
         cur_device.start_time = self.get_now()
-        cur_device.task_duration = 0
+        self.update_task_duration(cur_device)
         if cur_device.night_time_on != 'None':
             self.turn_on(cur_device.switch_entity)
             self.log(f'switch {cur_device.name} actif')
