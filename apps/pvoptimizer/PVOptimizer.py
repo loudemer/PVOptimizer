@@ -1,7 +1,7 @@
 ##############################################################################################
 # PVOptimizer
 # Author: Gerard Mamelle (2024)
-# Version : 1.0.2
+# Version : 1.0.3
 # Program under MIT licence
 ##############################################################################################
 import hassapi as hass
@@ -282,7 +282,7 @@ class PVOptimizer(hass.Hass):
         if cur_device.started == 'on':
             cur_device.task_duration = self.get_delay_minutes(self.get_now(), cur_device.start_time)
         else:
-            cur_device.task_duration == 0
+            cur_device.task_duration = 0
         self.set_state(cur_device.duration_entity, state=str(cur_device.task_duration))
 
     # Get a safe float state value for an entity.
