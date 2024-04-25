@@ -22,7 +22,7 @@ PVOptimizer:
   prix_blanc_hp: 18.94
   prix_rouge_hc: 15.68
   prix_rouge_hp: 75.64
-  # If you don't resell export grid energy leave 0.0
+  # If you don't resell export grid energy, leave it to 0.0
   prix_rachat: 11.00
 
   # Device list fill all items for each device
@@ -44,10 +44,10 @@ PVOptimizer:
     lave_linge:
       name: lave_linge
       power: 2200
-      duration: 60
+      duration: 180
       switch_entity: switch.lave_linge
       night_time_on: "04:00:00"
-    ev_charging:
+    pac:
       name: pac
       power: 1500
       duration: 120
@@ -59,7 +59,7 @@ PVOptimizer:
       duration: 60
       switch_entity: switch.piscine_pompe_filtration   
       night_time_on: None
-    pac:
+    ev_charging:
       name: ev_charging
       power: 2200
       duration: 120

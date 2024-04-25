@@ -1,7 +1,7 @@
 ##############################################################################################
 # PVOptimizer
 # Author: Gerard Mamelle (2024)
-# Version : 1.0.3
+# Version : 1.0.5
 # Program under MIT licence
 ##############################################################################################
 import hassapi as hass
@@ -37,13 +37,13 @@ class device:
     def __init__(self, name: str, index: str, power: int, min_duration: int, switch_entity: str, night_time_on: str):
         # control entities
         self.name = name                                                # device name
-        self.enable_entity = "input_boolean.device_request_" + index   # request entity
-        self.switch_entity = switch_entity                                     # switch entity
+        self.enable_entity = "input_boolean.device_request_" + index    # request entity
+        self.switch_entity = switch_entity                              # switch entity
         self.start_entity = "input_boolean.start_device_" + index       # start entity
         self.duration_entity = "input_text.device_duration_" + index    # task duration entity display
         # device parameters
         self.power= power                                               # device power
-        self.min_duration = min_duration  # cycle duration              # Min duration task
+        self.min_duration = min_duration                                # Min duration task
         self.request= "off"                                             # request status
         self.task_duration = 0                                          # duration of current task    
         self.start_time=datetime.datetime.now()                         # start time of task
@@ -128,15 +128,23 @@ class PVOptimizer(hass.Hass):
             # try to init new device request
             self.try_init_new_process()               
 
-    # Reinit all request and start commands at sunrise
     def init_day(self, kwargs):                             
         self.log("Init day")
-        for cur_device in self.device_list:
-            cur_device.request = self.get_state(cur_device.enable_entity)
-            cur_device.started = 'off'
-            self.stop_device(cur_device)
+        self.reset_all_devices()
         self.compute_power_ratio()
          
+    # Reinit all request and start commands at sunrise
+    def reset_all_devices(self):
+        for cur_device in self.device_list:
+            device_switch_status = self.get_state(cur_device.switch_entity)
+            if device_switch_status == 'on':
+                self.turn_off(cur_device.switch_entity)
+                self.log(f'switch {cur_device.name} off')
+            self.set_state(cur_device.enable_entity, state="off")
+            self.set_state(cur_device.start_entity, state="off")
+            cur_device.request = 'off'
+            cur_device.started = 'off'
+
     # fill device list with each device described in SolarOptimizer.yaml file
     def create_device_list(self) :
         i = 1
@@ -231,7 +239,6 @@ class PVOptimizer(hass.Hass):
         self.turn_on(entity_id)
     
     # Stop device if min duration is reached
-        
     def check_end_process(self, cur_device):
         if cur_device.task_duration > cur_device.min_duration:   
             self.stop_device(cur_device)
