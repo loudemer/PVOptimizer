@@ -1,39 +1,49 @@
 input_boolean:
-    device_request_1:
-        name: Device request 1
-    device_request_2:
-        name: Device request 2
-    device_request_3:
-        name: Device request 3
-    device_request_4:
-        name: Device request 4
-    device_request_5:
-        name: Device request 5
-    device_request_6:
-        name: Device request 6
-    device_request_7:
-        name: Device request 7
-    device_request_8:
-        name: Device request 8
-
-    start_device_1:
-        name: Start device 1
-    start_device_2:
-        name: Start device 2
-    start_device_3:
-        name: Start device 3
-    start_device_4:
-        name: Start device 4
-    start_device_5:
-        name: Start device 5
-    start_device_6:
-        name: Start device 6
-    start_device_7:
-        name: Start device 7
-    start_device_8:
-        name: Start device 8
+  # sensors to record device request
+  # device_request_1 for first device in my_devices list (in PVOptimizer.yaml) 
+  # device_request_2 for second device .....
+  device_request_1:
+      name: Device request 1
+  device_request_2:
+      name: Device request 2
+  device_request_3:
+      name: Device request 3
+  device_request_4:
+      name: Device request 4
+  device_request_5:
+      name: Device request 5
+  device_request_6:
+      name: Device request 6
+  device_request_7:
+      name: Device request 7
+  device_request_8:
+      name: Device request 8
+  
+  # sensors to record start or stop device command 
+  start_device_1:
+      name: Start device 1
+  start_device_2:
+      name: Start device 2
+  start_device_3:
+      name: Start device 3
+  start_device_4:
+      name: Start device 4
+  start_device_5:
+      name: Start device 5
+  start_device_6:
+      name: Start device 6
+  start_device_7:
+      name: Start device 7
+  start_device_8:
+      name: Start device 8
+  
+  # sensor to enable PV optimizer integration
+  enable_solar_optimizer:
+    name: "enable PV Optimizer"
+    initial: true
 
 input_text:
+  # sensors to display device duration since last startup
   device_duration_1:
     name: "Device duration 1"
     initial: "0"
