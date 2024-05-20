@@ -1,8 +1,11 @@
 ##############################################################################################
 # PVOptimizer
 # Author: Gerard Mamelle (2024)
-# Version : 1.0.5
+# Version : 1.1.0
 # Program under MIT licence
+#
+# Release
+# 1.1.0 Run with multiple Off peak periods
 ##############################################################################################
 import hassapi as hass
 import math
@@ -55,7 +58,7 @@ class device:
 class PVOptimizer(hass.Hass):
 
     def initialize(self):
-        self.log("Start SolarOptimizer")
+        self.log("Start PVOptimizer")
 
         # Create device list from yaml file
         self.device_list = []
@@ -68,22 +71,30 @@ class PVOptimizer(hass.Hass):
         self.create_device_list()
         # check if entities exist, if not create missing entities
         self.check_switch_entities()
-        
-        # Init 
-        self.power_ratio = 1.0
-        # compute current power ratio 
-        self.compute_power_ratio()
+        # Grid contract subscription 
+        self.contratHeuresCreuses = bool(self.args["subscription"] != 'Base')
+        # off_peak indicator
+        if self.contratHeuresCreuses:
+            self.off_peak = self.get_state(self.args["off_peak"])
         # init grid status 
         self.available_energy = 0
-        self.update_current_grid_status()
-        # schedule day initialization
-        self.run_at_sunrise(self.init_day)              
-        # schedule day loop
+        # Init power ratio
+        self.power_ratio = 1.0
+       
+        # listen for grid of_peak status change
+        if self.contratHeuresCreuses:
+            self.listen_state(self.change_off_peak,self.args["off_peak"])
+        # schedule day initialization after tempo color change
+        self.run_daily(self.init_day, "06:10:00")              
+        # schedule day loop every 60 seconds
         self.run_every(self.day_loop, "now", 60)  
-        # schedule night tasks in case of they were not run during day
-        self.run_daily(self.run_remaining_tasks,"22:00:00")
 
-        self.log("SolarOptimizer initialized")
+        # compute current power ratio 
+        self.compute_power_ratio()
+        # get grid power balance
+        self.update_current_grid_status()
+
+        self.log("PVOptimizer initialized")
 
     @property
     def color_tempo(self) -> str:
@@ -133,6 +144,15 @@ class PVOptimizer(hass.Hass):
         self.reset_all_devices()
         self.compute_power_ratio()
          
+    # Change off peak status 
+    def change_off_peak(self, entity, attribute, old_state, new_state, kwargs):
+        if not self.contratHeuresCreuses:
+            return
+        self.log(f'Off peak = {new_state}')
+        self.off_peak = new_state
+        if self.off_peak == 'on':
+            self.run_remaining_tasks()
+
     # Reinit all request and start commands at sunrise
     def reset_all_devices(self):
         for cur_device in self.device_list:
@@ -266,13 +286,17 @@ class PVOptimizer(hass.Hass):
             return False
 
     # Call night schedule time for those tasks who were not executed during the day 
-    def run_remaining_tasks(self,kwargs):
-        self.log("Night Tasks")
+    def run_remaining_tasks(self):
+        self.log("Program HC Tasks")
         for cur_device in self.device_list:
             cur_device.request = self.get_state(cur_device.enable_entity)            
             if cur_device.request == 'on' and cur_device.night_time_on != 'None':
-                self.run_at(self.start_delayed_device,cur_device.night_time_on, entity_id=cur_device.switch_entity )
-                self.log(f' {cur_device.name} scheduled')
+                if self.now_is_between("13:00:00", "19:00:00") and self.now_is_between("13:00:00", "19:00:00", None, cur_device.night_time_on):
+                    self.run_at(self.start_delayed_device,cur_device.night_time_on, entity_id=cur_device.switch_entity )
+                    self.log(f' {cur_device.name} scheduled')
+                if self.now_is_between("19:00:01", "07:00:00") and self.now_is_between("19:00:01", "07:00:00", None, cur_device.night_time_on):
+                    self.run_at(self.start_delayed_device,cur_device.night_time_on, entity_id=cur_device.switch_entity )
+                    self.log(f' {cur_device.name} scheduled')
     
     # Check if min duration is reached
     def check_min_duration_ok(self, cur_device) -> bool:            
@@ -303,8 +327,7 @@ class PVOptimizer(hass.Hass):
 
     # compute power ratio to initiate a new task
     def compute_power_ratio(self):
-        subscription = self.args['subscription']
-        if  subscription == "Tempo":
+        if  self.subscription == "Tempo":
             color_tempo = self.color_tempo
             if color_tempo == "Bleu":
                 self.power_ratio = 1.0 - (self.args['prix_bleu_hc']-self.args['prix_rachat']) / self.args['prix_bleu_hp']
@@ -313,7 +336,7 @@ class PVOptimizer(hass.Hass):
                     self.power_ratio = 1.0 - (self.args['prix_blanc_hc']-self.args['prix_rachat']) / self.args['prix_blanc_hp']
                 else:
                     self.power_ratio = 1.0 - (self.args['prix_rouge_hc']-self.args['prix_rachat']) / self.args['prix_rouge_hp']
-        elif subscription == "HeuresCreuses":
+        elif self.subscription == "HeuresCreuses":
             self.power_ratio = 1.0 - (self.args['prix_bleu_hc']-self.args['prix_rachat']) / self.args['prix_bleu_hp']   
         else: # Base subscription 
             self.power_ratio = 1.0 

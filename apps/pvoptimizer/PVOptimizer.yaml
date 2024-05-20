@@ -14,6 +14,8 @@ PVOptimizer:
   # you an get it with RTE API
   # leave an empty string "" if not 
   journee_tempo: sensor.rte_tempo_couleur_actuelle
+  # off_peak indicator (HP / HC) 
+  off_peak: binary_sensor.rte_tempo_heures_creuses
 
   # For HeuresCreuses subscription fill only prix_bleu_hc and prix_bleu_hp
   prix_bleu_hc: 12.96
@@ -23,7 +25,7 @@ PVOptimizer:
   prix_rouge_hc: 15.68
   prix_rouge_hp: 75.64
   # If you don't resell export grid energy, leave it to 0.0
-  prix_rachat: 11.00
+  prix_rachat: 13.00
 
   # Device list fill all items for each device
   # Restricted to 8 devices at present time

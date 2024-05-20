@@ -53,14 +53,20 @@ cards:
     entity: sensor.lave_vaisselle_power
     primary: '{{ states(''sensor.lave_vaisselle_power'') }} W'
     secondary: ''
-    icon: |-
-      {% if int(states('sensor.lave_vaisselle_power')) > 0 %}
+    icon: >-
+      {% if states('sensor.lave_vaisselle_power') in ('unknown', 'unavailable')
+      %}
+        mdi:power-off
+      {% elif int(states('sensor.lave_vaisselle_power')) > 0 %}
         mdi:power-on
       {% else %}
         mdi:power-off
       {% endif %}
-    icon_color: |-
-      {% if int(states('sensor.lave_vaisselle_power')) > 0 %}
+    icon_color: >-
+      {% if states('sensor.lave_vaisselle_power') in ('unknown', 'unavailable')
+      %}
+        grey
+      {% elif int(states('sensor.lave_vaisselle_power')) > 0 %}
         green
       {% else %}
         grey
@@ -143,13 +149,17 @@ cards:
     primary: '{{ states(''sensor.seche_linge_power'') }} W'
     secondary: ''
     icon: |-
-      {% if int(states('sensor.seche_linge_power')) > 0 %}
+      {% if states('sensor.seche_linge_power') in ('unknown', 'unavailable') %}
+        mdi:power-off
+      {% elif int(states('sensor.seche_linge_power')) > 0 %}
         mdi:power-on
       {% else %}
         mdi:power-off
       {% endif %}
     icon_color: |-
-      {% if int(states('sensor.seche_linge_power')) > 0 %}
+      {% if states('sensor.seche_linge_power') in ('unknown', 'unavailable') %}
+        grey
+      {% elif int(states('sensor.seche_linge_power')) > 0 %}
         green
       {% else %}
         grey
@@ -232,13 +242,17 @@ cards:
     primary: '{{ states(''sensor.lave_linge_power'') }} W'
     secondary: ''
     icon: |-
-      {% if int(states('sensor.lave_linge_power')) > 0 %}
+      {% if states('sensor.lave_linge_power') in ('unknown', 'unavailable') %}
+        mdi:power-off
+      {% elif int(states('sensor.lave_linge_power')) > 0 %}
         mdi:power-on
       {% else %}
         mdi:power-off
       {% endif %}
     icon_color: |-
-      {% if int(states('sensor.lave_linge_power')) > 0 %}
+      {% if states('sensor.lave_linge_power') in ('unknown', 'unavailable') %}
+        grey
+      {% elif int(states('sensor.lave_linge_power')) > 0 %}
         green
       {% else %}
         grey
@@ -321,13 +335,19 @@ cards:
     primary: '{{ states(''sensor.pac_puissance'') }} W'
     secondary: ''
     icon: |-
-      {% if int(states('sensor.pac_puissance')) > 40 %}
+      {% if states('sensor.pac_puissance') in ('unknown', 'unavailable')
+      %}
+        mdi:power-off
+      {% elif int(states('sensor.pac_puissance')) > 45 %}
         mdi:power-on
       {% else %}
         mdi:power-off
       {% endif %}
     icon_color: |-
-      {% if int(states('sensor.pac_puissance')) > 40 %}
+      {% if states('sensor.pac_puissance') in ('unknown', 'unavailable')
+      %}
+        grey
+      {% elif int(states('sensor.pac_puissance')) > 40 %}
         green
       {% else %}
         grey
@@ -410,13 +430,19 @@ cards:
     primary: '{{ states(''sensor.piscine_puissance'') }} W'
     secondary: ''
     icon: |-
-      {% if int(states('sensor.piscine_puissance')) > 5 %}
+      {% if states('sensor.piscine_puissance') in ('unknown', 'unavailable')
+      %}
+        mdi:power-off
+      {% elif int(states('sensor.piscine_puissance')) > 5 %}
         mdi:power-on
       {% else %}
         mdi:power-off
       {% endif %}
     icon_color: |-
-      {% if int(states('sensor.piscine_puissance')) > 5 %}
+      {% if states('sensor.piscine_puissance') in ('unknown', 'unavailable')
+      %}
+        grey
+      {% elif int(states('sensor.piscine_puissance')) > 5 %}
         green
       {% else %}
         grey
@@ -499,13 +525,19 @@ cards:
     primary: '{{ states(''sensor.ev_charging_power'') }} W'
     secondary: ''
     icon: |-
-      {% if int(states('sensor.ev_charging_power')) > 0 %}
+      {% if states('sensor.ev_charging_power') in ('unknown', 'unavailable')
+      %}
+        mdi:power-off
+      {% elif int(states('sensor.ev_charging_power')) > 0 %}
         mdi:power-on
       {% else %}
         mdi:power-off
       {% endif %}
     icon_color: |-
-      {% if int(states('sensor.ev_charging_power')) > 0 %}
+      {% if states('sensor.ev_charging_power') in ('unknown', 'unavailable')
+      %}
+        grey
+      {% elif int(states('sensor.ev_charging_power')) > 0 %}
         green
       {% else %}
         grey
