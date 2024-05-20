@@ -163,6 +163,6 @@ Par exemple si vous avez une période Heure creuse l'apès midi entre 14h et 17h
 ATTENTION pour la mise à niveau, cette nouvelle version nécessite l'ajout d'une ligne dans le fichier `PVOptimizer.yaml`:
 
 ```yaml  
-	   off_peak: binary_sensor.heure_creuse 
+       off_peak: binary_sensor.heure_creuse 
 ```
 
